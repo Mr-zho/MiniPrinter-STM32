@@ -1,0 +1,38 @@
+# Build outputs
+build/
+Debug/
+Release/
+Objects/
+Listings/
+MDK-ARM/printer/
+
+# Keil/MDK generated files
+*.axf
+*.bin
+*.crf
+*.d
+*.dep
+*.hex
+*.htm
+*.lnp
+*.lst
+*.map
+*.o
+*.sct
+*.tra
+*.uvguix.*
+*.uvgui.*
+JLinkLog.txt
+
+# IDE and OS files
+.vscode/
+.idea/
+*.swp
+*.tmp
+Thumbs.db
+Desktop.ini
+
+# Local archives/backups
+*.7z
+*.zip
+*.rar
