@@ -84,13 +84,12 @@ void run_report()
 void run_printer()
 {
     device_state_t *pdevice = get_device_state();
-		#ifdef START_PRINTER_WHEN_FINISH_RAED
+		#if START_PRINTER_WHEN_FINISH_RAED
         if (pdevice->read_ble_finish == true)
         {
             if (pdevice->printer_state == PRINTER_STATUS_FINISH ||
                 pdevice->printer_state == PRINTER_STATUS_INIT)
             {
-                pdevice->read_ble_finish = false;
                 pdevice->printer_state = PRINTER_STATUS_START;
                 ble_report();
                 printf("report device status : printing start %d\n",get_ble_rx_leftline());
@@ -100,14 +99,14 @@ void run_printer()
         }
     #else
 			// 接收大于100条时，才触发开始打印
-			if (get_ble_rx_leftline()> 200)
+			if (pdevice->read_ble_finish == true || get_ble_rx_leftline() >= START_PRINTER_BUFFER_LINES)
 			{
 					if (pdevice->printer_state == PRINTER_STATUS_FINISH ||
 							pdevice->printer_state == PRINTER_STATUS_INIT)
 					{
 							pdevice->printer_state = PRINTER_STATUS_START;
 							ble_report();
-							printf("report device status : printing start\n");
+							printf("report device status : printing start %d\n",get_ble_rx_leftline());
 							run_beep(BEEP_PRINTER_START);
 							run_led(LED_PRINTER_START);
 					}

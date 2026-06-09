@@ -295,6 +295,7 @@ void start_printing_by_queuebuf()
 {
     uint8_t *pdata = NULL;
 		uint32_t printer_count = 0;
+    device_state_t *pdevice = get_device_state();
     init_printing();
     while (1)
     {
@@ -312,8 +313,15 @@ void start_printing_by_queuebuf()
         }
         else
         {
-            if (move_and_start_std(true, ALL_STB_NUM))
-                break;
+            if (pdevice->read_ble_finish)
+            {
+                if (move_and_start_std(true, ALL_STB_NUM))
+                    break;
+            }
+            else
+            {
+                vTaskDelay(2);
+            }
         }
         if (get_printer_timeout_status())
             break;
@@ -323,6 +331,7 @@ void start_printing_by_queuebuf()
     motor_run_step(400);
     motor_stop();
     clean_blepack_count();
+    set_read_ble_finish(false);
     printf("printer finish !!! read=%d printer:%d\n",get_blepack_count(),printer_count);
 }
 

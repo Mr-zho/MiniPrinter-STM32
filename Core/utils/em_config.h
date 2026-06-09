@@ -18,8 +18,10 @@
 
 #define BLE_NAME "Mini-Printer"
 
-//接收完成所有数据才开始打印
-#define START_PRINTER_WHEN_FINISH_RAED 1
+// 0: start printing while receiving data; 1: wait until all BLE data is received.
+#define START_PRINTER_WHEN_FINISH_RAED 0
+// Start before the fixed line queue is full, otherwise long images are truncated.
+#define START_PRINTER_BUFFER_LINES 120
 
 //按键引脚
 //34 35 36 39仅可以作为输入INPUT,不支持INPUT_PULLUP

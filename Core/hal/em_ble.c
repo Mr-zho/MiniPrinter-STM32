@@ -104,18 +104,6 @@ void uart_cmd_handle(uint8_t data){
                                                 return;
                                  }
                         }
-												if(cmd_index >= 5){
-													if(cmd_buffer[cmd_index-1] == 0x01){
-														if(cmd_buffer[cmd_index-2] == 0xA6 && cmd_buffer[cmd_index-3] == 0xA6 && cmd_buffer[cmd_index-4] == 0xA6 && cmd_buffer[cmd_index-5] == 0xA6){
-															printf("---->read finish 2 = %d\n",packcount);
-															cmd_index = 0;
-															memset(cmd_buffer,0,sizeof(cmd_buffer));
-															set_read_ble_finish(true);
-															return;
-														}
-													}
-												}
-													
                         if(cmd_index >= 48){
                                 packcount++;
                                 write_to_printbuffer(cmd_buffer,cmd_index);

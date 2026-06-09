@@ -50,7 +50,7 @@ void open_printer_timeout_timer(){
   printer_timeout = false;
 	osTimerDef(myTimeoutTimer, read_timeout_timer_callbackfun);
   myTimeoutTimerHandle = osTimerCreate(osTimer(myTimeoutTimer), osTimerOnce, NULL);
-	osTimerStart(myTimeoutTimerHandle,20000);    
+	osTimerStart(myTimeoutTimerHandle,120000);
 }
 
 void close_printer_timeout_timer(){
