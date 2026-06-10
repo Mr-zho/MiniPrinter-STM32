@@ -5,6 +5,7 @@ Release/
 Objects/
 Listings/
 MDK-ARM/printer/
+**/MDK-ARM/printer/
 
 # Keil/MDK generated files
 *.axf
