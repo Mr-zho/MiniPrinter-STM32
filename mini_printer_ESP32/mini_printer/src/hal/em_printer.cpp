@@ -198,7 +198,7 @@ bool move_and_start_std(bool need_stop, uint8_t stbnum)
 
 /**
  * @brief 打印错误检查
- * 
+ *
  * @param need_report 是否需BLE上报
  * @return true 打印出错
  * @return false 打印正常
@@ -279,8 +279,8 @@ void start_printing(uint8_t *data, uint32_t len)
 void start_printing_by_queuebuf()
 {
     uint8_t *pdata = NULL;
-    bool need_stop = false;
     uint32_t printer_count = 0;
+    device_state_t *pdevice = get_device_state();
     init_printing();
     while (1)
     {
@@ -298,8 +298,15 @@ void start_printing_by_queuebuf()
         }
         else
         {
-            if (move_and_start_std(true, ALL_STB_NUM))
-                break;
+            if (pdevice->read_ble_finish)
+            {
+                if (move_and_start_std(true, ALL_STB_NUM))
+                    break;
+            }
+            else
+            {
+                vTaskDelay(2);
+            }
         }
         if (get_printer_timeout_status())
             break;
@@ -310,6 +317,7 @@ void start_printing_by_queuebuf()
     motor_stop();
     Serial.printf("打印完成 接收总行数:%d 打印总行数:%d\n",get_blepack_count(),printer_count);
     clean_blepack_count();
+    set_read_ble_finish(false);
 }
 
 /**

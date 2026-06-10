@@ -6,6 +6,7 @@ SemaphoreHandle_t xHandler = NULL;
 
 void init_queue()
 {
+    clean_printbuffer();
     xHandler = xSemaphoreCreateMutex();
 }
 
@@ -26,6 +27,7 @@ void write_to_printbuffer(uint8_t *pdata, size_t length)
     // 查看是否可以获得信号量，如果信号量不可用，则用10个时钟滴答来查看信号量是否可用
     if (xSemaphoreTake(xHandler, (portTickType)10) == pdPASS)
     {
+        memset(&g_ble_rx.printer_buffer[g_ble_rx.w_index], 0, MAX_ONELINE_BYTE);
         memcpy(&g_ble_rx.printer_buffer[g_ble_rx.w_index], pdata, length);
         g_ble_rx.w_index++;
         g_ble_rx.left_line++;

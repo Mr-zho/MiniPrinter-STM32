@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#define _FREERTOS_OPEN_ 
+#define _FREERTOS_OPEN_
 
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"         // 自定义打印服务UUID
 
@@ -11,8 +11,10 @@
 
 #define BLE_NAME "Mini-Printer"
 
-//接收完成所有数据才开始打印
-#define START_PRINTER_WHEN_FINISH_RAED 1
+// 0: start printing while receiving data; 1: wait until all BLE data is received.
+#define START_PRINTER_WHEN_FINISH_RAED 0
+// Start before the fixed line queue is full, otherwise long images are truncated.
+#define START_PRINTER_BUFFER_LINES 120
 
 //按键引脚
 //34 35 36 39仅可以作为输入INPUT,不支持INPUT_PULLUP
@@ -42,12 +44,12 @@
 #define PIN_SDA 13
 
 //原厂 V3
-#define PIN_STB1 25  
-#define PIN_STB2 33  
-#define PIN_STB3 32  
-#define PIN_STB4 14  
-#define PIN_STB5 27  
-#define PIN_STB6 26  
+#define PIN_STB1 25
+#define PIN_STB2 33
+#define PIN_STB3 32
+#define PIN_STB4 14
+#define PIN_STB5 27
+#define PIN_STB6 26
 
 //拆机 V2
 // #define PIN_STB1 14

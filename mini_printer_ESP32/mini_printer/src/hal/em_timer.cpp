@@ -37,7 +37,7 @@ bool get_printer_timeout_status(){
 
 void open_printer_timeout_timer(){
   printer_timeout = false;
-  printer_timer.once_ms(20000, printer_timeout_callbackfun);     
+  printer_timer.once_ms(120000, printer_timeout_callbackfun);
 }
 
 void close_printer_timeout_timer(){

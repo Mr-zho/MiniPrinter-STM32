@@ -4,9 +4,56 @@
 BLECharacteristic *pCharacteristic = NULL;
 bool bleConnected = false;
 uint32_t packcount = 0;
+static uint8_t line_buffer[MAX_ONELINE_BYTE];
+static size_t line_index = 0;
+
+static void reset_print_line_buffer()
+{
+    line_index = 0;
+    memset(line_buffer, 0, sizeof(line_buffer));
+}
+
+static void enqueue_print_line()
+{
+    write_to_printbuffer(line_buffer, MAX_ONELINE_BYTE);
+    packcount++;
+    reset_print_line_buffer();
+    if ((packcount % 50) == 0)
+    {
+        Serial.printf("received print lines=%d\n", packcount);
+    }
+}
+
+static void flush_partial_print_line()
+{
+    if (line_index == 0)
+        return;
+    memset(&line_buffer[line_index], 0, MAX_ONELINE_BYTE - line_index);
+    enqueue_print_line();
+}
+
+static void enqueue_print_bytes(uint8_t *pdata, size_t length)
+{
+    while (length > 0)
+    {
+        size_t copy_len = MAX_ONELINE_BYTE - line_index;
+        if (copy_len > length)
+            copy_len = length;
+        memcpy(&line_buffer[line_index], pdata, copy_len);
+        line_index += copy_len;
+        pdata += copy_len;
+        length -= copy_len;
+
+        if (line_index >= MAX_ONELINE_BYTE)
+        {
+            enqueue_print_line();
+        }
+    }
+}
 
 void clean_blepack_count(){
     packcount = 0;
+    reset_print_line_buffer();
 }
 
 uint32_t get_blepack_count(){
@@ -37,6 +84,9 @@ class bleServerCallbacks : public BLEServerCallbacks
     {
         bleConnected = true;
         packcount = 0;
+        reset_print_line_buffer();
+        clean_printbuffer();
+        set_read_ble_finish(false);
         Serial.println("现在有设备接入~");
         run_beep(BEEP_CONNECT);
         run_led(LED_CONNECT);
@@ -60,33 +110,38 @@ class bleCharacteristicCallbacks : public BLECharacteristicCallbacks
     }
 
     void onWrite(BLECharacteristic *pCharacteristic)
-    { // 客户端写入事件回调函数
+    {
         size_t length = pCharacteristic->getLength();
         uint8_t *pdata = pCharacteristic->getData();
-        if(length == 5){
-            if(pdata[0] == 0xA5 && pdata[1] == 0xA5 && pdata[2] == 0xA5 && pdata[3] == 0xA5){
-                if(pdata[4] == 1){
+
+        if (length == 5)
+        {
+            if (pdata[0] == 0xA5 && pdata[1] == 0xA5 && pdata[2] == 0xA5 && pdata[3] == 0xA5)
+            {
+                if (pdata[4] == 1)
+                {
                     set_heat_density(30);
-                }else if(pdata[4] == 2){
-                    set_heat_density(60); 
-                }else{
+                }
+                else if (pdata[4] == 2)
+                {
+                    set_heat_density(60);
+                }
+                else
+                {
                     set_heat_density(100);
                 }
                 return;
             }
-            if(pdata[0] == 0xA6 && pdata[1] == 0xA6 && pdata[2] == 0xA6 && pdata[3] == 0xA6){
+            if (pdata[0] == 0xA6 && pdata[1] == 0xA6 && pdata[2] == 0xA6 && pdata[3] == 0xA6)
+            {
+                flush_partial_print_line();
                 set_read_ble_finish(true);
-                Serial.printf("接收打印数据完成,总行数=%d\n",packcount);
+                Serial.printf("receive print data finish, total lines=%d\n", packcount);
+                return;
             }
         }
-        packcount++;
-        write_to_printbuffer(pdata,length);
-        Serial.printf("触发写入事件 length=%d count=%d ", length, packcount);
-        for (int index = 0; index < length; index++)
-        {
-            Serial.printf(" %x", pdata[index]);
-        }
-        Serial.printf("\n");
+
+        enqueue_print_bytes(pdata, length);
     }
 };
 
@@ -107,7 +162,7 @@ void init_ble()
             BLECharacteristic::PROPERTY_WRITE_NR);
     // 如果客户端连上设备后没有任何写入的情况下第一次读取到的数据应该是这里设置的值
     pCharacteristic->setCallbacks(new bleCharacteristicCallbacks());
-    pCharacteristic->addDescriptor(new BLE2902()); // 添加描述 
+    pCharacteristic->addDescriptor(new BLE2902()); // 添加描述
     pService->start(); // 启动服务
     BLEDevice::startAdvertising();
 }
